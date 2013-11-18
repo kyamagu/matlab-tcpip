@@ -1,0 +1,72 @@
+function response = TCPClient(hostname, port, request, varargin)
+%TCPCLIENT Send a TCP request.
+%
+%    response = TCPClient(hostname, port, request, ...)
+%
+% Send a TCP request to a specified port of the host. Start a TCPSERVER process
+% in the server side before making a client request.
+%
+% The function accepts the following additional option.
+%
+% * 'serialize' - Logical flag to automatically serialize Matlab variables in
+%                 request and response. When false, a caller must give raw
+%                 bytes to the function. Default true.
+%
+% Example
+% -------
+%
+% Start a plus-1 server at port 3000 in a server process.
+%
+%    TCPServer(@(x)x+1, 'port', 3000);
+%
+% In a client process, send a request to the server running at localhost.
+%
+%    response = TCPClient('localhost', 3000, 1:5);
+%    disp(response); % Shows 2:6.
+%
+% See also TCPSERVER
+  error(nargchk(3, inf, nargin, 'struct'));
+  error(javachk('jvm'));
+  assert(ischar(hostname), 'Hostname must be a string: %s.', class(hostname));
+  assert(isnumeric(port), 'Port must be numeric: %s.', class(port))
+
+  % Get options.
+  options = struct(...
+    'serialize', true ...
+    );
+  options = getOptions(options, varargin{:});
+
+  request = serializeOrValidate(options, request);
+  socket = sendRequest(hostname, port, request);
+  if nargout > 0
+    response = receiveResponse(socket);
+    response = deserializeAndValidate(options, response);
+  else
+    socket.close();
+  end
+end
+
+function socket = sendRequest(hostname, port, request)
+%SENDREQUEST Send a request.
+  socket = java.net.Socket(hostname, port);
+  output_stream = java.io.DataOutputStream(socket.getOutputStream());
+  output_stream.write(request);
+  socket.shutdownOutput();
+end
+
+function response = receiveResponse(socket)
+%RECEIVERESPONSE Receive a server response.
+  input_stream = socket.getInputStream();
+  response = org.apache.commons.io.IOUtils.toByteArray(input_stream);
+  input_stream.close();
+end
+
+function response = deserializeAndValidate(options, response)
+%DESERIALIZEANDVALIDATE Deserialize the response and check an error.
+  if options.serialize
+    response = deserialize(response);
+    if isa(response, 'MException')
+      rethrow(response);
+    end
+  end
+end

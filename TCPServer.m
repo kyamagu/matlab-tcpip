@@ -8,7 +8,7 @@ function TCPServer(callback, varargin)
 % function callback. Use TCPCLIENT to communicate with this process. The server
 % process runs indefinite. Use Ctrl-C to quit the process.
 %
-% The function accepts following additional options.
+% The function accepts following options.
 %
 % * 'port' - TCP port to use. When the port number is 0, the function picks up
 %            any available port in the system. Default 0.
@@ -18,7 +18,7 @@ function TCPServer(callback, varargin)
 %                 Default true.
 % * 'quiet' - Logical flag to suppress display messages. Default false.
 %
-% Any additional arguments are passed to the provided function handle.
+% Any additional name-value arguments are passed to the provided function handle.
 %
 % Example
 % -------

@@ -6,7 +6,7 @@ function response = TCPClient(hostname, port, request, varargin)
 % Send a TCP request to a specified port of the host. Start a TCPSERVER process
 % in the server side before making a client request.
 %
-% The function accepts the following additional option.
+% The function accepts a following option.
 %
 % * 'serialize' - Logical flag to automatically serialize Matlab variables in
 %                 request and response. When false, a caller must give raw

@@ -55,7 +55,7 @@ _TCPServer_
 function callback. Use `TCPClient` to communicate with this process. The server
 runs indefinite. Use Ctrl-C to quit the process.
 
-The function accepts following additional options.
+The function accepts following options.
 
   * `port` - TCP port to use. When the port number is 0, the function picks up
              any available port in the system. Default 0.
@@ -69,7 +69,7 @@ _TCPClient_
 
     response = TCPClient(hostname, port, request, ...)
  
-The function accepts the following additional option.
+The function accepts a following option.
  
   * `serialize` - Logical flag to automatically serialize Matlab variables in
                   request and response. Default true.

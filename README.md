@@ -30,7 +30,7 @@ Serve a custom callback function `dispatch` at port 5000.
     TCPServer(@dispatch, 'port', 5000);
 
 Where, `dispatch` is a user-defined callback that takes a single input argument
-of a client request and returns a single output sent back to a client.
+of a client request and returns a single output sent back to the client.
 
     function response = dispatch(request)
     %DISPATCH Process a TCP/IP request.

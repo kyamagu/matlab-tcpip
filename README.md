@@ -19,11 +19,18 @@ Add a path to matlab-tcpip to use the API.
 
     addpath('/path/to/matlab-tcpip');
 
-_Server_
+_Plus-1 server_
 
 Start a plus-1 server at port 3000, which adds 1 to any given request.
  
     TCPServer(@(x)x+1, 'port', 3000);
+
+Send a request to the server running at localhost on port 3000.
+
+    response = TCPClient('localhost', 3000, 1); % Send `1`.
+    disp(response); % Shows `2` from the plus-1 server.
+
+_Custom callback_
 
 Serve a custom callback function `dispatch` at port 5000.
  
@@ -36,12 +43,6 @@ of a client request and returns a single output sent back to the client.
     %DISPATCH Process a TCP/IP request.
     ...
 
-_Client_
-
-Send a request to the server running at localhost on port 3000.
-
-    response = TCPClient('localhost', 3000, 1); % Send `1`.
-    disp(response); % Shows `2` from the plus-1 server.
 
 API
 ---
@@ -55,7 +56,7 @@ _TCPServer_
 function callback. Use `TCPClient` to communicate with this process. The server
 runs indefinite. Use Ctrl-C to quit the process.
 
-The function accepts following options.
+The function accepts the following options.
 
   * `port` - TCP port to use. When the port number is 0, the function picks up
              any available port in the system. Default 0.
@@ -69,7 +70,7 @@ _TCPClient_
 
     response = TCPClient(hostname, port, request, ...)
  
-The function accepts a following option.
+The function accepts the following option.
  
   * `serialize` - Logical flag to automatically serialize Matlab variables in
                   request and response. Default true.

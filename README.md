@@ -12,6 +12,14 @@ There are two high-level functions.
     TCPClient - Send a TCP request.
     TCPServer - Run a TCP server process.
 
+Build
+-----
+
+Compile MEX files by the attached `make` function if not yet done before.
+
+    addpath('/path/to/matlab-tcpip');
+    make();
+
 Example
 -------
 
@@ -22,7 +30,7 @@ Add a path to matlab-tcpip to use the API.
 _Plus-1 server_
 
 Start a plus-1 server at port 3000, which adds 1 to any given request.
- 
+
     TCPServer(@(x)x+1, 'port', 3000);
 
 Send a request to the server running at localhost on port 3000.
@@ -33,7 +41,7 @@ Send a request to the server running at localhost on port 3000.
 _Custom callback_
 
 Serve a custom callback function `dispatch` at port 5000.
- 
+
     TCPServer(@dispatch, 'port', 5000);
 
 Where, `dispatch` is a user-defined callback that takes a single input argument
@@ -51,7 +59,7 @@ _TCPServer_
 
     TCPServer(callback, ...)
     TCPServer(callback, 'port', 0, 'serialize', true, ...)
- 
+
 `TCPServer` starts a TCP server process and respond to a request with a given
 function callback. Use `TCPClient` to communicate with this process. The server
 runs indefinite. Use Ctrl-C to quit the process.
@@ -69,8 +77,8 @@ The function accepts the following options.
 _TCPClient_
 
     response = TCPClient(hostname, port, request, ...)
- 
+
 The function accepts the following option.
- 
+
   * `serialize` - Logical flag to automatically serialize Matlab variables in
                   request and response. Default true.

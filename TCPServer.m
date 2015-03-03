@@ -28,7 +28,7 @@ function TCPServer(callback, varargin)
 %     TCPServer(@(x)x+1, 'port', 3000);
 %
 % Serve a custom callback function `dispatch` at port 5000.
-% 
+%
 %     TCPServer(@dispatch, 'port', 5000);
 %
 % Where, `dispatch` is a user-defined callback that takes a single input

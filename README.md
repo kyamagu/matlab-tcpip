@@ -15,10 +15,9 @@ There are two high-level functions.
 Build
 -----
 
-Compile MEX files by the attached `make` function if not yet done before.
+Compile MEX files and Java helpers by the attached `Makefile`.
 
-    addpath('/path/to/matlab-tcpip');
-    make();
+    make
 
 Example
 -------
@@ -72,6 +71,9 @@ The function accepts the following options.
                   request and response. When false, a callback function takes
                   raw bytes and must return raw bytes in the output arguments.
                   Default true.
+  * `onetime` - If true, terminate the server upon the first request. Default
+                false.
+  * `buffer_size` - Size of the internal buffer. Default 4096.
   * `quiet` - Logical flag to suppress display messages. Default false.
 
 _TCPClient_
@@ -82,3 +84,4 @@ The function accepts the following option.
 
   * `serialize` - Logical flag to automatically serialize Matlab variables in
                   request and response. Default true.
+  * `buffer_size` - Size of the internal buffer. Default 4096.

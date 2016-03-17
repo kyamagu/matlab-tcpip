@@ -11,6 +11,7 @@ function response = TCPClient(hostname, port, request, varargin)
 % * 'serialize' - Logical flag to automatically serialize Matlab variables in
 %                 request and response. When false, a caller must give raw
 %                 bytes to the function. Default true.
+% * 'buffer_size' - Size of the internal buffer. Default 4096.
 %
 % Example
 % -------
@@ -26,38 +27,42 @@ function response = TCPClient(hostname, port, request, varargin)
 %
 % See also TCPSERVER
   error(nargchk(3, inf, nargin, 'struct'));
-  error(javachk('jvm'));
   assert(ischar(hostname), 'Hostname must be a string: %s.', class(hostname));
   assert(isnumeric(port), 'Port must be numeric: %s.', class(port))
+  startup('WarnOnAddPath', true);
 
   % Get options.
   options = struct(...
-    'serialize', true ...
+    'serialize', true, ...
+    'buffer_size', 4096 ...
     );
   options = getOptions(options, varargin{:});
 
   request = serializeOrValidate(options, request);
-  socket = sendRequest(hostname, port, request);
+  socket = sendRequest(options, hostname, port, request);
   if nargout > 0
-    response = receiveResponse(socket);
+    response = receiveResponse(options, socket);
     response = deserializeAndValidate(options, response);
   else
     socket.close();
   end
 end
 
-function socket = sendRequest(hostname, port, request)
+function socket = sendRequest(options, hostname, port, request)
 %SENDREQUEST Send a request.
   socket = java.net.Socket(hostname, port);
-  output_stream = java.io.DataOutputStream(socket.getOutputStream());
-  output_stream.write(request);
+  % output_stream = java.io.BufferedOutputStream(socket.getOutputStream());
+  output_stream = socket.getOutputStream();
+  writeOutputStream(output_stream, request, options.buffer_size);
+  output_stream.flush();
   socket.shutdownOutput();
 end
 
-function response = receiveResponse(socket)
+function response = receiveResponse(options, socket)
 %RECEIVERESPONSE Receive a server response.
-  input_stream = socket.getInputStream();
-  response = org.apache.commons.io.IOUtils.toByteArray(input_stream);
+  input_stream = matlab_tcpip.BufferedInputStreamWithRead(...
+      socket.getInputStream(), int32(options.buffer_size));
+  response = readInputStream(input_stream, options.buffer_size);
   input_stream.close();
 end
 

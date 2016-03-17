@@ -16,6 +16,9 @@ function TCPServer(callback, varargin)
 %                 request and response.  When false, a callback function takes
 %                 raw bytes and must return raw bytes in the output arguments.
 %                 Default true.
+% * 'onetime' - If true, terminate the server upon the first request. Default
+%               false.
+% * 'buffer_size' - Size of the internal buffer. Default 4096.
 % * 'quiet' - Logical flag to suppress display messages. Default false.
 %
 % Any additional name-value arguments are passed to the provided function handle.
@@ -41,16 +44,18 @@ function TCPServer(callback, varargin)
 %
 % See also TCPClient
   error(nargchk(1, inf, nargin, 'struct'));
-  error(javachk('jvm'));
   assert(ischar(callback) || isa(callback, 'function_handle'), ...
          'Input must be a function name or a function handle.');
   assert(nargin(callback) ~= 0, 'Function must take an argument.');
   assert(nargout(callback) ~= 0, 'Function must return an argument.');
+  startup('WarnOnAddPath', true);
 
   % Get options.
   options = struct(...
     'port', 0, ...
     'serialize', true, ...
+    'buffer_size', 4096, ...
+    'onetime', false, ...
     'quiet', false ...
     );
   [options, varargin] = getOptions(options, varargin{:});
@@ -64,6 +69,10 @@ function TCPServer(callback, varargin)
       response = executeOrCatch(options, callback, request, varargin{:});
       response = serializeOrValidate(options, response);
       sendResponse(options, client_socket, response);
+      if options.onetime
+        server_socket.close();
+        break
+      end
     catch exception
       server_socket.close();
       rethrow(exception);
@@ -84,11 +93,13 @@ end
 function [request, client_socket] = receiveRequest(options, server_socket)
 %RECEIVETCPREQUEST Receive a TCP request.
   client_socket = server_socket.accept();
-  input_stream = client_socket.getInputStream();
-  request = org.apache.commons.io.IOUtils.toByteArray(input_stream);
+  input_stream = matlab_tcpip.BufferedInputStreamWithRead(...
+      client_socket.getInputStream(), int32(options.buffer_size));
+  request = readInputStream(input_stream, options.buffer_size);
   if ~options.quiet
-    fprintf('[%s] %s\n', ...
+    fprintf('[%s] Received %d bytes from %s\n', ...
             datestr(now), ...
+            numel(request), ...
             char(client_socket.getLocalSocketAddress()));
   end
 end
@@ -114,8 +125,9 @@ end
 
 function sendResponse(options, client_socket, response)
 %RESPONDTCPREQUEST Respond to a TCP request.
+  % output_stream = java.io.BufferedOutputStream(...
+  %     client_socket.getOutputStream());
   output_stream = client_socket.getOutputStream();
-  output_stream = java.io.DataOutputStream(output_stream);
-  output_stream.write(response);
+  writeOutputStream(output_stream, response, options.buffer_size);
   output_stream.close();
 end
